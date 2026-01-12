@@ -11,6 +11,7 @@ export const GIF_POOLS = {
   bad: [
     'https://media2.giphy.com/media/qryGWflHFCKv6/giphy.gif',
     'https://media0.giphy.com/media/KAQg0sejGV5F6/giphy.gif',
+    'https://media3.giphy.com/media/IYIlvuWc21U4g/giphy.gif,
     'https://media4.giphy.com/media/vNNsw7IsdQfowDotga/giphy.gif',
   ],
   problem: [

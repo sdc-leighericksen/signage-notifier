@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
+import { Query } from 'appwrite';
 import { Notification } from './types';
 import { NotificationList } from './components/NotificationList';
 import { NotificationPopup } from './components/NotificationPopup';
-import { GIF_POOLS, API_BASE_URL, POLL_INTERVAL_MS } from './config';
+import { GIF_POOLS, DATABASE_ID, COLLECTION_ID, POLL_INTERVAL_MS } from './config';
+import { databases } from './lib/appwrite';
 
 function App() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -17,33 +19,27 @@ function App() {
 
   const fetchNotifications = async () => {
     try {
-      console.log('Fetching notifications from:', API_BASE_URL);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const response = await fetch(
-        API_BASE_URL + '/functions/v1/notifications-latest',
-        {
-          signal: controller.signal,
-          headers: {
-            'Accept': 'application/json',
-          },
-        }
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTION_ID,
+        [Query.orderDesc('$createdAt'), Query.limit(6)]
       );
-      clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok: ' + response.status);
-      }
+      const mapped: Notification[] = response.documents.map((doc) => ({
+        id: doc.$id,
+        title: doc.title as string,
+        description: doc.description as string,
+        color: doc.colour as string,
+        image: doc.Image as 'good' | 'bad' | 'problem',
+        timestamp: doc.timestamp as string,
+        created_at: doc.$createdAt,
+      }));
 
-      const data = await response.json();
-      console.log('Received notifications:', data);
-
-      if (data.notifications && data.notifications.length > 0) {
-        const newLatestId = data.notifications[0].id;
+      if (mapped.length > 0) {
+        const newLatestId = mapped[0].id;
 
         if (!isInitialLoadRef.current && latestIdRef.current && newLatestId !== latestIdRef.current) {
-          const notification = data.notifications[0];
+          const notification = mapped[0];
           const gifPool = GIF_POOLS[notification.image] || GIF_POOLS.good;
           const randomGif = gifPool.length > 0
             ? gifPool[Math.floor(Math.random() * gifPool.length)]
@@ -54,7 +50,7 @@ function App() {
         }
 
         latestIdRef.current = newLatestId;
-        setNotifications(data.notifications);
+        setNotifications(mapped);
 
         if (isInitialLoadRef.current) {
           isInitialLoadRef.current = false;
@@ -66,8 +62,8 @@ function App() {
 
       setError(null);
       retryCountRef.current = 0;
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
       setIsLoading(false);
 
       if (retryCountRef.current < maxRetries) {

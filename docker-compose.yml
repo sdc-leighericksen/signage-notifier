@@ -1,0 +1,18 @@
+services:
+  signage-notifier:
+    build:
+      context: .
+      args:
+        VITE_APPWRITE_ENDPOINT: ${VITE_APPWRITE_ENDPOINT}
+        VITE_APPWRITE_PROJECT_ID: ${VITE_APPWRITE_PROJECT_ID}
+    image: signage-notifier:latest
+    container_name: signage-notifier
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - caddy
+
+networks:
+  caddy:
+    external: true

@@ -11,7 +11,7 @@ export const GIF_POOLS = {
   bad: [
     'https://media2.giphy.com/media/qryGWflHFCKv6/giphy.gif',
     'https://media0.giphy.com/media/KAQg0sejGV5F6/giphy.gif',
-    'https://media3.giphy.com/media/IYIlvuWc21U4g/giphy.gif,
+    'https://media3.giphy.com/media/IYIlvuWc21U4g/giphy.gif',
     'https://media4.giphy.com/media/vNNsw7IsdQfowDotga/giphy.gif',
   ],
   problem: [
@@ -21,5 +21,8 @@ export const GIF_POOLS = {
   ],
 };
 
-export const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL;
+export const APPWRITE_ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT as string;
+export const APPWRITE_PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID as string;
+export const DATABASE_ID = '69c3748e00291108a53f';
+export const COLLECTION_ID = 'notifications';
 export const POLL_INTERVAL_MS = 5000;

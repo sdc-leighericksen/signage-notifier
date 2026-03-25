@@ -11,11 +11,98 @@ The system automatically checks for new notifications every 5 seconds and displa
 
 ## Architecture
 
+<<<<<<< Updated upstream
 The application uses:
 - **Frontend**: React-based display interface with automatic polling
 - **Backend**: Supabase database with two serverless edge functions
 - **Real-time Updates**: Polling mechanism checks for new notifications every 5 seconds
 - **Webhook Integration**: External systems can send notifications via HTTP POST
+=======
+- **Frontend**: React + Vite, served as static files via Nginx in Docker
+- **Database**: Appwrite (`signage-notifier` database, `notifications` collection)
+- **Webhook**: Appwrite Function (`notifications-webhook`) receives POST requests from external systems and writes to the database
+- **Display URL**: `https://signage-notifier.stokecloud.dev`
+
+---
+
+## Docker Deployment
+
+### Prerequisites
+
+- Docker and Docker Compose installed on the target machine
+- Caddy running with a shared Docker network named `caddy`
+- Access to the Appwrite instance at `https://appwrite.stokecloud.dev`
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sdc-leighericksen/signage-notifier/
+cd signage-notifier
+```
+
+### 2. Create the environment file
+
+```bash
+cp .env.example .env
+```
+
+The `.env` file should contain:
+
+```env
+VITE_APPWRITE_ENDPOINT=https://appwrite.stokecloud.dev/v1
+VITE_APPWRITE_PROJECT_ID=69c371dd001dd980ebd7
+```
+
+### 3. Create the Caddy Docker network (if it doesn't exist)
+
+```bash
+docker network create caddy
+```
+
+### 4. Build and start the container
+
+```bash
+docker compose up -d --build
+```
+
+This will:
+- Build the React app with the Appwrite credentials baked in
+- Serve it via Nginx on port 80 inside the container
+- Expose it on the `caddy` Docker network as `signage-notifier`
+
+### 5. Configure Caddy
+
+Add this block to your Caddyfile (typically `/etc/caddy/Caddyfile`):
+
+```
+signage-notifier.stokecloud.dev {
+    reverse_proxy signage-notifier:80
+}
+```
+
+Then reload Caddy:
+
+```bash
+caddy reload --config /etc/caddy/Caddyfile
+# or if running Caddy in Docker:
+docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+### 6. Verify
+
+Open `https://signage-notifier.stokecloud.dev` in a browser. The app should load and display notifications.
+
+---
+
+### Updating the app
+
+After pulling new changes, rebuild and restart the container:
+
+```bash
+git pull
+docker compose up -d --build
+```
+>>>>>>> Stashed changes
 
 ---
 
